@@ -1,0 +1,11 @@
+O projeto consiste no desenvolvimento de um sistema para coletar, armazenar, analisar e comparar informações de diferentes notebooks. A ideia surgiu da necessidade de testar vários computadores de maneira padronizada, evitando executar manualmente diversos comandos em cada máquina para descobrir suas configurações, estado de conservação e desempenho.
+
+A coleta será realizada por meio de um script Bash executado em um Live Linux. O script será responsável por identificar informações como fabricante, modelo, processador, memória RAM, GPU, armazenamento, saúde do SSD ou HDD, informações da bateria, temperaturas e resultados de testes de desempenho. Após coletar os dados, o script irá organizá-los em um arquivo ou objeto JSON e enviá-los através de uma requisição HTTP para uma API.
+
+A API principal será desenvolvida em Java com Spring Boot e terá a responsabilidade de receber, validar e armazenar os dados coletados. As informações serão persistidas em um banco de dados PostgreSQL, permitindo manter um histórico dos computadores e dos testes realizados.
+
+Para a análise dos dados, será utilizado Python, possivelmente com FastAPI e bibliotecas como Pandas e NumPy. Esse serviço será responsável por realizar cálculos, comparar os notebooks e gerar diferentes tipos de rankings, como desempenho, conservação, bateria e armazenamento. Também será criado um sistema de pontuação que poderá combinar diferentes características para determinar qual computador apresenta o melhor resultado geral.
+
+O frontend será responsável por apresentar essas informações de forma visual, permitindo visualizar os notebooks cadastrados, seus componentes, resultados dos testes, pontuações, rankings e comparações entre diferentes máquinas.
+
+A arquitetura geral do projeto será composta por um script Bash para coleta, uma API principal em Spring Boot, PostgreSQL para armazenamento, um serviço de análise em Python e uma interface web para visualização dos resultados. Como o projeto será utilizado para analisar no máximo cerca de 20 notebooks, a prioridade será manter o sistema organizado, confiável e fácil de evoluir, sem a necessidade de desenvolver uma infraestrutura voltada para grandes volumes de dados.
