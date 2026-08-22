@@ -1,5 +1,5 @@
 # Dados coletados localmente (podem conter números de série)
-Bash/result.json
+bash/result.json
 
 # Segredos e configurações locais
 .env
@@ -13,7 +13,7 @@ Thumbs.db
 .vscode/
 
 # Obsidian local
-Obsidian/.obsidian/
+obsidian/.obsidian/
 
 # Java / Spring Boot
 target/
