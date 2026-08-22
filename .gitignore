@@ -1,0 +1,38 @@
+# Dados coletados localmente (podem conter números de série)
+Bash/result.json
+
+# Segredos e configurações locais
+.env
+.env.*
+!.env.example
+
+# Sistema operacional e editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Obsidian local
+Obsidian/.obsidian/
+
+# Java / Spring Boot
+target/
+build/
+.gradle/
+
+# Python / FastAPI
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+
+# Frontend JavaScript
+node_modules/
+dist/
+coverage/
+
+# Arquivos temporários e logs
+*.log
+*.tmp
