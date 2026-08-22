@@ -72,7 +72,8 @@ gpu_model=$(lspci | grep -Ei "vga|3d|display" | cut -d ':' -f 3 | xargs)
 # ==============================================================================
 # 6. INFORMAÇÕES DO ARMAZENAMENTO (SMART)
 # ==============================================================================
-target_disk=$(lsblk -d -n -o NAME,TYPE | grep 'disk' | head -n 1 | awk '{print $1}')
+# Ignora o pendrive do Ubuntu Live e seleciona o primeiro disco interno disponível.
+target_disk=$(lsblk -d -n -o NAME,TYPE,TRAN | awk '$2 == "disk" && $3 != "usb" { print $1; exit }')
 
 if [ -n "$target_disk" ]; then
     disk_path="/dev/$target_disk"
@@ -108,30 +109,48 @@ else
 fi
 
 # ==============================================================================
-# 7. INFORMAÇÕES DA BATERIA (Apenas Saúde e Ciclos)
+# 7. INFORMAÇÕES DA BATERIA
 # ==============================================================================
-bat_path="/sys/class/power_supply/BAT0"
+bat_path=""
+for candidate in /sys/class/power_supply/BAT*; do
+    if [ -d "$candidate" ]; then
+        bat_path="$candidate"
+        break
+    fi
+done
 
-if [ -d "$bat_path" ]; then
+if [ -n "$bat_path" ]; then
     bat_cycles=$(cat "$bat_path/cycle_count" 2>/dev/null)
-    
-    energy_full=$(cat "$bat_path/energy_full" 2>/dev/null)
-    [ -z "$energy_full" ] && energy_full=$(cat "$bat_path/charge_full" 2>/dev/null)
-    
-    energy_design=$(cat "$bat_path/energy_full_design" 2>/dev/null)
-    [ -z "$energy_design" ] && energy_design=$(cat "$bat_path/charge_full_design" 2>/dev/null)
 
-    if [ -n "$energy_full" ] && [ -n "$energy_design" ] && [ "$energy_design" -gt 0 ] 2>/dev/null; then
-        bat_health=$(( (energy_full * 100) / energy_design ))
+    if [ -r "$bat_path/energy_full" ] && [ -r "$bat_path/energy_full_design" ]; then
+        full_capacity=$(cat "$bat_path/energy_full" 2>/dev/null)
+        design_capacity=$(cat "$bat_path/energy_full_design" 2>/dev/null)
+        capacity_unit="uWh"
+    elif [ -r "$bat_path/charge_full" ] && [ -r "$bat_path/charge_full_design" ]; then
+        full_capacity=$(cat "$bat_path/charge_full" 2>/dev/null)
+        design_capacity=$(cat "$bat_path/charge_full_design" 2>/dev/null)
+        capacity_unit="uAh"
     else
-        bat_health="null"
+        full_capacity="null"
+        design_capacity="null"
+        capacity_unit="N/A"
     fi
     
     [[ ! "$bat_cycles" =~ ^[0-9]+$ ]] && bat_cycles="null"
-    [[ ! "$bat_health" =~ ^[0-9]+$ ]] && bat_health="null"
+    [[ ! "$full_capacity" =~ ^[0-9]+$ ]] && full_capacity="null"
+    [[ ! "$design_capacity" =~ ^[0-9]+$ ]] && design_capacity="null"
+
+    if [ "$full_capacity" != "null" ] && [ "$design_capacity" != "null" ] && [ "$design_capacity" -gt 0 ]; then
+        bat_health=$(( (full_capacity * 100) / design_capacity ))
+    else
+        bat_health="null"
+    fi
 else
     bat_health="null"
     bat_cycles="null"
+    full_capacity="null"
+    design_capacity="null"
+    capacity_unit="N/A"
 fi
 
 # ==============================================================================
@@ -158,6 +177,9 @@ jq -n \
   --argjson disk_hours "${disk_hours:-null}" \
   --argjson bat_health "${bat_health:-null}" \
   --argjson bat_cycles "${bat_cycles:-null}" \
+  --argjson full_capacity "${full_capacity:-null}" \
+  --argjson design_capacity "${design_capacity:-null}" \
+  --arg capacity_unit "$capacity_unit" \
   '{
     computer: {
       manufacturer: $manufacturer,
@@ -189,7 +211,10 @@ jq -n \
     },
     battery: {
       health_percentage: $bat_health,
-      cycle_count: $bat_cycles
+      cycle_count: $bat_cycles,
+      full_capacity: $full_capacity,
+      design_capacity: $design_capacity,
+      capacity_unit: $capacity_unit
     }
   }' > result.json
 
