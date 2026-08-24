@@ -26,7 +26,7 @@ public class Notebook {
     @OneToMany(mappedBy = "notebook", fetch = FetchType.LAZY)
     private List<NotebookCollection> collections = new ArrayList<>();
 
-    protected Notebook() {
+    public Notebook() {
     }
 
     public Long getId() {

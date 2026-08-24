@@ -80,7 +80,7 @@ public class NotebookCollection {
     @Column(name = "battery_capacity_unit")
     private String batteryCapacityUnit;
 
-    protected NotebookCollection() {
+    public NotebookCollection() {
     }
 
     public Long getId() {
