@@ -35,6 +35,7 @@ class NotebookRepositoryTest {
         assertThat(found.get().getManufacturer()).isEqualTo("Lenovo");
         assertThat(found.get().getModel()).isEqualTo("ThinkPad T14");
         assertThat(found.get().getId()).isNotNull();
+        assertThat(notebookRepository.existsBySerialNumber("TEST-SERIAL-123")).isTrue();
     }
 
     @Test
@@ -43,5 +44,6 @@ class NotebookRepositoryTest {
         Optional<Notebook> found = notebookRepository.findBySerialNumber("NON-EXISTENT-SERIAL");
 
         assertThat(found).isEmpty();
+        assertThat(notebookRepository.existsBySerialNumber("NON-EXISTENT-SERIAL")).isFalse();
     }
 }
