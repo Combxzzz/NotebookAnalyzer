@@ -26,6 +26,14 @@ public class Notebook {
     @OneToMany(mappedBy = "notebook", fetch = FetchType.LAZY)
     private List<NotebookCollection> collections = new ArrayList<>();
 
+    // MAPPER CONSTRUCTOR
+    public Notebook(String serialNumber, String manufacturer, String model) {
+        this.serialNumber = serialNumber;
+        this.manufacturer = manufacturer;
+        this.model = model;
+    }
+
+    // TODO: DEFINIR COMO PROTECTED E AJUSTAR AS CLASSES DE TESTES
     public Notebook() {
     }
 

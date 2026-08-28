@@ -80,6 +80,52 @@ public class NotebookCollection {
     @Column(name = "battery_capacity_unit")
     private String batteryCapacityUnit;
 
+    public NotebookCollection(
+            Notebook notebook,
+            String cpuModel,
+            String cpuArchitecture,
+            Integer cpuCores,
+            Integer cpuThreads,
+            Integer cpuTemperatureCelsius,
+            Integer memoryTotalGb,
+            String memoryType,
+            Integer memorySpeedMhz,
+            String gpuModel,
+            String storageModel,
+            String storageSerialNumber,
+            String storageSize,
+            String storageType,
+            String storageHealthStatus,
+            Long storagePowerOnHours,
+            Short batteryHealthPercentage,
+            Integer batteryCycleCount,
+            Long batteryFullCapacity,
+            Long batteryDesignCapacity,
+            String batteryCapacityUnit) {
+
+        this.notebook = notebook;
+        this.cpuModel = cpuModel;
+        this.cpuArchitecture = cpuArchitecture;
+        this.cpuCores = cpuCores;
+        this.cpuThreads = cpuThreads;
+        this.cpuTemperatureCelsius = cpuTemperatureCelsius;
+        this.memoryTotalGb = memoryTotalGb;
+        this.memoryType = memoryType;
+        this.memorySpeedMhz = memorySpeedMhz;
+        this.gpuModel = gpuModel;
+        this.storageModel = storageModel;
+        this.storageSerialNumber = storageSerialNumber;
+        this.storageSize = storageSize;
+        this.storageType = storageType;
+        this.storageHealthStatus = storageHealthStatus;
+        this.storagePowerOnHours = storagePowerOnHours;
+        this.batteryHealthPercentage = batteryHealthPercentage;
+        this.batteryCycleCount = batteryCycleCount;
+        this.batteryFullCapacity = batteryFullCapacity;
+        this.batteryDesignCapacity = batteryDesignCapacity;
+        this.batteryCapacityUnit = batteryCapacityUnit;
+    }
+
     public NotebookCollection() {
     }
 
