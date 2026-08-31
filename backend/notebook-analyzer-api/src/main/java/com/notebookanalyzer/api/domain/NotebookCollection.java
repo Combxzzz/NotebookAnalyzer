@@ -1,12 +1,18 @@
 package com.notebookanalyzer.api.domain;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.Instant;
 import java.util.Objects;
 
 @Entity
 @Table(name = "notebook_collections")
+@Getter
+@Setter
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
+@Builder
 public class NotebookCollection {
 
     @Id
@@ -17,7 +23,7 @@ public class NotebookCollection {
     @JoinColumn(name = "notebook_id", nullable = false)
     private Notebook notebook;
 
-    @Column(name = "received_at", insertable = false, updatable = false)
+    @Column(name = "received_at", nullable = false, updatable = false)
     private Instant receivedAt;
 
     @Column(name = "cpu_model")
@@ -80,229 +86,11 @@ public class NotebookCollection {
     @Column(name = "battery_capacity_unit")
     private String batteryCapacityUnit;
 
-    public NotebookCollection(
-            Notebook notebook,
-            String cpuModel,
-            String cpuArchitecture,
-            Integer cpuCores,
-            Integer cpuThreads,
-            Integer cpuTemperatureCelsius,
-            Integer memoryTotalGb,
-            String memoryType,
-            Integer memorySpeedMhz,
-            String gpuModel,
-            String storageModel,
-            String storageSerialNumber,
-            String storageSize,
-            String storageType,
-            String storageHealthStatus,
-            Long storagePowerOnHours,
-            Short batteryHealthPercentage,
-            Integer batteryCycleCount,
-            Long batteryFullCapacity,
-            Long batteryDesignCapacity,
-            String batteryCapacityUnit) {
-
-        this.notebook = notebook;
-        this.cpuModel = cpuModel;
-        this.cpuArchitecture = cpuArchitecture;
-        this.cpuCores = cpuCores;
-        this.cpuThreads = cpuThreads;
-        this.cpuTemperatureCelsius = cpuTemperatureCelsius;
-        this.memoryTotalGb = memoryTotalGb;
-        this.memoryType = memoryType;
-        this.memorySpeedMhz = memorySpeedMhz;
-        this.gpuModel = gpuModel;
-        this.storageModel = storageModel;
-        this.storageSerialNumber = storageSerialNumber;
-        this.storageSize = storageSize;
-        this.storageType = storageType;
-        this.storageHealthStatus = storageHealthStatus;
-        this.storagePowerOnHours = storagePowerOnHours;
-        this.batteryHealthPercentage = batteryHealthPercentage;
-        this.batteryCycleCount = batteryCycleCount;
-        this.batteryFullCapacity = batteryFullCapacity;
-        this.batteryDesignCapacity = batteryDesignCapacity;
-        this.batteryCapacityUnit = batteryCapacityUnit;
-    }
-
-    public NotebookCollection() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public Notebook getNotebook() {
-        return notebook;
-    }
-
-    public void setNotebook(Notebook notebook) {
-        this.notebook = notebook;
-    }
-
-    public Instant getReceivedAt() {
-        return receivedAt;
-    }
-
-    public String getCpuModel() {
-        return cpuModel;
-    }
-
-    public void setCpuModel(String cpuModel) {
-        this.cpuModel = cpuModel;
-    }
-
-    public String getCpuArchitecture() {
-        return cpuArchitecture;
-    }
-
-    public void setCpuArchitecture(String cpuArchitecture) {
-        this.cpuArchitecture = cpuArchitecture;
-    }
-
-    public Integer getCpuCores() {
-        return cpuCores;
-    }
-
-    public void setCpuCores(Integer cpuCores) {
-        this.cpuCores = cpuCores;
-    }
-
-    public Integer getCpuThreads() {
-        return cpuThreads;
-    }
-
-    public void setCpuThreads(Integer cpuThreads) {
-        this.cpuThreads = cpuThreads;
-    }
-
-    public Integer getCpuTemperatureCelsius() {
-        return cpuTemperatureCelsius;
-    }
-
-    public void setCpuTemperatureCelsius(Integer cpuTemperatureCelsius) {
-        this.cpuTemperatureCelsius = cpuTemperatureCelsius;
-    }
-
-    public Integer getMemoryTotalGb() {
-        return memoryTotalGb;
-    }
-
-    public void setMemoryTotalGb(Integer memoryTotalGb) {
-        this.memoryTotalGb = memoryTotalGb;
-    }
-
-    public String getMemoryType() {
-        return memoryType;
-    }
-
-    public void setMemoryType(String memoryType) {
-        this.memoryType = memoryType;
-    }
-
-    public Integer getMemorySpeedMhz() {
-        return memorySpeedMhz;
-    }
-
-    public void setMemorySpeedMhz(Integer memorySpeedMhz) {
-        this.memorySpeedMhz = memorySpeedMhz;
-    }
-
-    public String getGpuModel() {
-        return gpuModel;
-    }
-
-    public void setGpuModel(String gpuModel) {
-        this.gpuModel = gpuModel;
-    }
-
-    public String getStorageModel() {
-        return storageModel;
-    }
-
-    public void setStorageModel(String storageModel) {
-        this.storageModel = storageModel;
-    }
-
-    public String getStorageSerialNumber() {
-        return storageSerialNumber;
-    }
-
-    public void setStorageSerialNumber(String storageSerialNumber) {
-        this.storageSerialNumber = storageSerialNumber;
-    }
-
-    public String getStorageSize() {
-        return storageSize;
-    }
-
-    public void setStorageSize(String storageSize) {
-        this.storageSize = storageSize;
-    }
-
-    public String getStorageType() {
-        return storageType;
-    }
-
-    public void setStorageType(String storageType) {
-        this.storageType = storageType;
-    }
-
-    public String getStorageHealthStatus() {
-        return storageHealthStatus;
-    }
-
-    public void setStorageHealthStatus(String storageHealthStatus) {
-        this.storageHealthStatus = storageHealthStatus;
-    }
-
-    public Long getStoragePowerOnHours() {
-        return storagePowerOnHours;
-    }
-
-    public void setStoragePowerOnHours(Long storagePowerOnHours) {
-        this.storagePowerOnHours = storagePowerOnHours;
-    }
-
-    public Short getBatteryHealthPercentage() {
-        return batteryHealthPercentage;
-    }
-
-    public void setBatteryHealthPercentage(Short batteryHealthPercentage) {
-        this.batteryHealthPercentage = batteryHealthPercentage;
-    }
-
-    public Integer getBatteryCycleCount() {
-        return batteryCycleCount;
-    }
-
-    public void setBatteryCycleCount(Integer batteryCycleCount) {
-        this.batteryCycleCount = batteryCycleCount;
-    }
-
-    public Long getBatteryFullCapacity() {
-        return batteryFullCapacity;
-    }
-
-    public void setBatteryFullCapacity(Long batteryFullCapacity) {
-        this.batteryFullCapacity = batteryFullCapacity;
-    }
-
-    public Long getBatteryDesignCapacity() {
-        return batteryDesignCapacity;
-    }
-
-    public void setBatteryDesignCapacity(Long batteryDesignCapacity) {
-        this.batteryDesignCapacity = batteryDesignCapacity;
-    }
-
-    public String getBatteryCapacityUnit() {
-        return batteryCapacityUnit;
-    }
-
-    public void setBatteryCapacityUnit(String batteryCapacityUnit) {
-        this.batteryCapacityUnit = batteryCapacityUnit;
+    @PrePersist
+    private void onCreate() {
+        if (this.receivedAt == null) {
+            this.receivedAt = Instant.now();
+        }
     }
 
     @Override

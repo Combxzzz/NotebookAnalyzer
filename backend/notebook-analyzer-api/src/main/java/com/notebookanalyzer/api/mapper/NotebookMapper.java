@@ -16,10 +16,10 @@ public class NotebookMapper {
     }
 
     public static Notebook toEntity(NotebookRequestDTO dto) {
-        return new Notebook(
-                dto.serialNumber(),
-                dto.manufacturer(),
-                dto.model()
-        );
+        return Notebook.builder()
+                .serialNumber(dto.serialNumber())
+                .manufacturer(dto.manufacturer())
+                .model(dto.model())
+                .build();
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,31 +25,46 @@ class NotebookCollectionRepositoryTest {
     private NotebookCollectionRepository notebookCollectionRepository;
 
     @Test
-    @DisplayName("Must save the collection and fetch by notebookId ordered by receipt date descending")
-    void shouldSaveAndFindByNotebookId() {
-        Notebook notebook = new Notebook();
-        notebook.setManufacturer("Dell");
-        notebook.setModel("Latitude 5420");
-        notebook.setSerialNumber("TEST-DELL-999");
-        Notebook savedNotebook = notebookRepository.save(notebook);
+    @DisplayName("Must return collections ordered by receivedAt DESC and fetch the latest one")
+    void shouldReturnCollectionsOrderedByReceivedAtDesc() throws InterruptedException {
 
-        NotebookCollection collection1 = new NotebookCollection();
-        collection1.setCpuModel("Intel Core i5-1135G7");
-        collection1.setMemoryTotalGb(16);
-        collection1.setStorageType("SSD");
-        notebook.addCollection(collection1);
+        Notebook notebookBuild = Notebook.builder()
+                .manufacturer("Dell")
+                .model("Latitude 5420")
+                .serialNumber("TEST-DELL-999")
+                .createdAt(Instant.parse("2026-08-29T10:00:00Z"))
+                .build();
 
-        notebookCollectionRepository.save(collection1);
+        Notebook notebook = notebookRepository.saveAndFlush(notebookBuild);
 
-        List<NotebookCollection> collections = notebookCollectionRepository.findByNotebookIdOrderByReceivedAtDesc(savedNotebook.getId());
+        NotebookCollection firstCollection = NotebookCollection.builder()
+                .cpuModel("Intel Core i5-1135G7")
+                .memoryTotalGb(8)
+                .receivedAt(Instant.parse("2026-08-30T10:00:00Z"))
+                .build();
+        notebook.addCollection(firstCollection);
+        notebookCollectionRepository.saveAndFlush(firstCollection);
 
-        assertThat(collections).hasSize(1);
-        assertThat(collections.get(0).getCpuModel()).isEqualTo("Intel Core i5-1135G7");
-        assertThat(collections.get(0).getMemoryTotalGb()).isEqualTo(16);
-        assertThat(collections.get(0).getNotebook().getId()).isEqualTo(savedNotebook.getId());
+        NotebookCollection secondCollection = NotebookCollection.builder()
+                .cpuModel("Intel Core i5-1135G7")
+                .memoryTotalGb(16)
+                .receivedAt(Instant.parse("2026-08-30T11:00:00Z"))
+                .build();
+        notebook.addCollection(secondCollection);
+        notebookCollectionRepository.saveAndFlush(secondCollection);
 
-        Optional<NotebookCollection> latest = notebookCollectionRepository.findFirstByNotebookIdOrderByReceivedAtDesc(savedNotebook.getId());
+        List<NotebookCollection> collections = notebookCollectionRepository
+                .findByNotebookIdOrderByReceivedAtDesc(notebook.getId());
+
+        assertThat(collections).hasSize(2);
+        assertThat(collections.getFirst().getId()).isEqualTo(secondCollection.getId());
+        assertThat(collections.get(1).getId()).isEqualTo(firstCollection.getId());
+
+        Optional<NotebookCollection> latest = notebookCollectionRepository
+                .findFirstByNotebookIdOrderByReceivedAtDesc(notebook.getId());
+
         assertThat(latest).isPresent();
-        assertThat(latest.get().getId()).isEqualTo(collection1.getId());
+        assertThat(latest.get().getId()).isEqualTo(secondCollection.getId());
+        assertThat(latest.get().getMemoryTotalGb()).isEqualTo(16);
     }
 }
