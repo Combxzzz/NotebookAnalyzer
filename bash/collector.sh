@@ -31,10 +31,6 @@ else
     model="$product_name"
 fi
 
-[ -z "$manufacturer" ] && manufacturer="N/A"
-[ -z "$model" ] && model="N/A"
-[ -z "$serial" ] && serial="N/A"
-
 # ==============================================================================
 # 3. INFORMAÇÕES DA CPU E TEMPERATURA
 # ==============================================================================
@@ -46,8 +42,6 @@ cpu_threads=$(lscpu | grep "^CPU(s):" | cut -d ':' -f 2 | xargs)
 # Leitura da temperatura ajustada para o formato do sensors (Package id 0: +XX.X°C)
 cpu_temp=$(sensors 2>/dev/null | grep -i "Package id 0" | awk '{print $4}' | tr -d '+°C' | cut -d'.' -f1)
 
-[ -z "$cpu_model" ] && cpu_model="N/A"
-[ -z "$cpu_arch" ] && cpu_arch="N/A"
 [[ ! "$cpu_cores" =~ ^[0-9]+$ ]] && cpu_cores="null"
 [[ ! "$cpu_threads" =~ ^[0-9]+$ ]] && cpu_threads="null"
 [[ ! "$cpu_temp" =~ ^[0-9]+$ ]] && cpu_temp="null"
@@ -60,14 +54,12 @@ ram_type=$(sudo dmidecode --type memory 2>/dev/null | grep -i "Type:" | grep -vE
 ram_speed=$(sudo dmidecode --type memory 2>/dev/null | grep -i "Configured Memory Speed:" | grep -v "Unknown" | head -n 1 | awk '{print $4}')
 
 [[ ! "$ram_gb" =~ ^[0-9]+$ ]] && ram_gb="null"
-[ -z "$ram_type" ] && ram_type="N/A"
 [[ ! "$ram_speed" =~ ^[0-9]+$ ]] && ram_speed="null"
 
 # ==============================================================================
 # 5. INFORMAÇÕES DA GPU
 # ==============================================================================
 gpu_model=$(lspci | grep -Ei "vga|3d|display" | cut -d ':' -f 3 | xargs)
-[ -z "$gpu_model" ] && gpu_model="N/A"
 
 # ==============================================================================
 # 6. INFORMAÇÕES DO ARMAZENAMENTO (SMART)
@@ -88,23 +80,19 @@ if [ -n "$target_disk" ]; then
     elif [ "$rotational" == "1" ]; then
         disk_type="HDD"
     else
-        disk_type="UNKNOWN"
+        disk_type=""
     fi
     
     disk_health=$(sudo smartctl -H "$disk_path" 2>/dev/null | grep -i "test result\|overall-health" | cut -d ':' -f 2 | xargs)
     disk_hours=$(sudo smartctl -A "$disk_path" 2>/dev/null | grep -i "Power_On_Hours\|Power On Hours" | awk '{print $NF}' | tr -d ',')
     
-    [ -z "$disk_model" ] && disk_model="N/A"
-    [ -z "$disk_serial" ] && disk_serial="N/A"
-    [ -z "$disk_size" ] && disk_size="N/A"
-    [ -z "$disk_health" ] && disk_health="UNKNOWN"
     [[ ! "$disk_hours" =~ ^[0-9]+$ ]] && disk_hours="null"
 else
-    disk_model="N/A"
-    disk_serial="N/A"
-    disk_size="N/A"
-    disk_type="N/A"
-    disk_health="N/A"
+    disk_model=""
+    disk_serial=""
+    disk_size=""
+    disk_type=""
+    disk_health=""
     disk_hours="null"
 fi
 
@@ -133,7 +121,7 @@ if [ -n "$bat_path" ]; then
     else
         full_capacity="null"
         design_capacity="null"
-        capacity_unit="N/A"
+        capacity_unit=""
     fi
     
     [[ ! "$bat_cycles" =~ ^[0-9]+$ ]] && bat_cycles="null"
@@ -150,7 +138,7 @@ else
     bat_cycles="null"
     full_capacity="null"
     design_capacity="null"
-    capacity_unit="N/A"
+    capacity_unit=""
 fi
 
 # ==============================================================================
@@ -180,33 +168,34 @@ jq -n \
   --argjson full_capacity "${full_capacity:-null}" \
   --argjson design_capacity "${design_capacity:-null}" \
   --arg capacity_unit "$capacity_unit" \
-  '{
-    computer: {
-      manufacturer: $manufacturer,
-      model: $model,
-      serial_number: $serial
+  'def sanitize: if . == null or . == "" or . == "N/A" or . == "UNKNOWN" or . == "Not Specified" then null else . end;
+  {
+    notebook: {
+      manufacturer: ($manufacturer | sanitize),
+      model: ($model | sanitize),
+      serial_number: ($serial | sanitize)
     },
     cpu: {
-      model: $cpu_model,
-      architecture: $cpu_arch,
+      model: ($cpu_model | sanitize),
+      architecture: ($cpu_arch | sanitize),
       cores: $cpu_cores,
       threads: $cpu_threads,
       temperature_celsius: $cpu_temp
     },
     memory: {
       total_gb: $ram_gb,
-      type: $ram_type,
+      type: ($ram_type | sanitize),
       speed_mhz: $ram_speed
     },
     gpu: {
-      model: $gpu_model
+      model: ($gpu_model | sanitize)
     },
     storage: {
-      model: $disk_model,
-      serial_number: $disk_serial,
-      size: $disk_size,
-      type: $disk_type,
-      health_status: $disk_health,
+      model: ($disk_model | sanitize),
+      serial_number: ($disk_serial | sanitize),
+      size: ($disk_size | sanitize),
+      type: ($disk_type | sanitize),
+      health_status: ($disk_health | sanitize),
       power_on_hours: $disk_hours
     },
     battery: {
@@ -214,7 +203,7 @@ jq -n \
       cycle_count: $bat_cycles,
       full_capacity: $full_capacity,
       design_capacity: $design_capacity,
-      capacity_unit: $capacity_unit
+      capacity_unit: ($capacity_unit | sanitize)
     }
   }' > result.json
 
