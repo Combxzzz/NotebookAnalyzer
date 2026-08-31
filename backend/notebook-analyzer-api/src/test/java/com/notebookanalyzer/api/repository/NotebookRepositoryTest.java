@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.*;
 
+import java.time.Instant;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,10 +22,12 @@ class NotebookRepositoryTest {
     @Test
     @DisplayName("Must save and find the notebook by serial number")
     void shouldSaveAndFindBySerialNumber() {
-        Notebook notebook = new Notebook();
-        notebook.setManufacturer("Lenovo");
-        notebook.setModel("ThinkPad T14");
-        notebook.setSerialNumber("TEST-SERIAL-123");
+        Notebook notebook = Notebook.builder()
+                        .manufacturer("Lenovo")
+                        .model("ThinkPad T14")
+                        .serialNumber("TEST-SERIAL-123")
+                        .createdAt(Instant.parse("2025-08-30T10:00:00Z"))
+                        .build();
 
         notebookRepository.save(notebook);
 
