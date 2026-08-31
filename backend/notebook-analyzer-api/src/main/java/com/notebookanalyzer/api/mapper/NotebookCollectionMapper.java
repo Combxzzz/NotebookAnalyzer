@@ -7,7 +7,7 @@ import com.notebookanalyzer.api.dto.notebookcollection.NotebookCollectionRespons
 
 public class NotebookCollectionMapper {
     public static NotebookCollectionResponseDTO toResponseDTO(NotebookCollection notebookCollection) {
-        return new NotebookCollectionResponseDTO(
+         return new NotebookCollectionResponseDTO(
                 notebookCollection.getId(),
                 notebookCollection.getNotebook().getId(),
                 notebookCollection.getReceivedAt(),
@@ -35,28 +35,28 @@ public class NotebookCollectionMapper {
     }
 
     public static NotebookCollection toEntity(NotebookCollectionRequestDTO dto, Notebook notebook) {
-        return new NotebookCollection(
-                notebook,
-                dto.cpuModel(),
-                dto.cpuArchitecture(),
-                dto.cpuCores(),
-                dto.cpuThreads(),
-                dto.cpuTemperatureCelsius(),
-                dto.memoryTotalGb(),
-                dto.memoryType(),
-                dto.memorySpeedMhz(),
-                dto.gpuModel(),
-                dto.storageModel(),
-                dto.storageSerialNumber(),
-                dto.storageSize(),
-                dto.storageType(),
-                dto.storageHealthStatus(),
-                dto.storagePowerOnHours(),
-                dto.batteryHealthPercentage(),
-                dto.batteryCycleCount(),
-                dto.batteryFullCapacity(),
-                dto.batteryDesignCapacity(),
-                dto.batteryCapacityUnit()
-        );
+        return NotebookCollection.builder()
+                .notebook(notebook)
+                .cpuModel(dto.cpu().model())
+                .cpuArchitecture(dto.cpu().architecture())
+                .cpuCores(dto.cpu().cores())
+                .cpuThreads(dto.cpu().threads())
+                .cpuTemperatureCelsius(dto.cpu().temperatureCelsius())
+                .memoryTotalGb(dto.memory().totalGb())
+                .memoryType(dto.memory().type())
+                .memorySpeedMhz(dto.memory().speedMhz())
+                .gpuModel(dto.gpu().model())
+                .storageModel(dto.storage().model())
+                .storageSerialNumber(dto.storage().serialNumber())
+                .storageSize(dto.storage().size())
+                .storageType(dto.storage().type())
+                .storageHealthStatus(dto.storage().healthStatus())
+                .storagePowerOnHours(dto.storage().powerOnHours())
+                .batteryHealthPercentage(dto.battery().healthPercentage())
+                .batteryCycleCount(dto.battery().cycleCount())
+                .batteryFullCapacity(dto.battery().fullCapacity())
+                .batteryDesignCapacity(dto.battery().designCapacity())
+                .batteryCapacityUnit(dto.battery().capacityUnit())
+                .build();
     }
 }
