@@ -1,6 +1,7 @@
 package com.notebookanalyzer.api.domain;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -9,6 +10,11 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "notebooks")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
 public class Notebook {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,57 +26,18 @@ public class Notebook {
     private String manufacturer;
     private String model;
 
-    @Column(name = "created_at", insertable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+    @Builder.Default
     @OneToMany(mappedBy = "notebook", fetch = FetchType.LAZY)
     private List<NotebookCollection> collections = new ArrayList<>();
 
-    // MAPPER CONSTRUCTOR
-    public Notebook(String serialNumber, String manufacturer, String model) {
-        this.serialNumber = serialNumber;
-        this.manufacturer = manufacturer;
-        this.model = model;
-    }
-
-    // TODO: DEFINIR COMO PROTECTED E AJUSTAR AS CLASSES DE TESTES
-    public Notebook() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getSerialNumber() {
-        return serialNumber;
-    }
-
-    public void setSerialNumber(String serialNumber) {
-        this.serialNumber = serialNumber;
-    }
-
-    public String getManufacturer() {
-        return manufacturer;
-    }
-
-    public void setManufacturer(String manufacturer) {
-        this.manufacturer = manufacturer;
-    }
-
-    public String getModel() {
-        return model;
-    }
-
-    public void setModel(String model) {
-        this.model = model;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public List<NotebookCollection> getCollections() {
-        return collections;
+    @PrePersist
+    private void onCreate() {
+        if (this.createdAt == null) {
+            this.createdAt = Instant.now();
+        }
     }
 
     public void addCollection(NotebookCollection collection) {
