@@ -13,4 +13,6 @@ public interface NotebookCollectionRepository extends JpaRepository<NotebookColl
     List<NotebookCollection> findByNotebookIdOrderByReceivedAtDesc(Long notebookId);
 
     Optional<NotebookCollection> findFirstByNotebookIdOrderByReceivedAtDesc(Long notebookId);
+
+    Optional<NotebookCollection> findByIdAndNotebookId(Long id, Long notebookId);
 }
