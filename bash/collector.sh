@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ==============================================================================
-# 1. INSTALAÇÃO E ATUALIZAÇÃO DE DEPENDÊNCIAS
+# 1. INSTALLATION AND UPDATING OF DEPENDENCIES
 # ==============================================================================
 echo "Atualizando repositórios e instalando dependências..."
 sudo apt update
@@ -10,7 +10,7 @@ sudo apt install -y jq curl smartmontools lm-sensors pciutils dmidecode
 echo "Coletando informações do computador..."
 
 # ==============================================================================
-# 2. INFORMAÇÕES DO COMPUTADOR (Tratativa para Nome Comercial)
+# 2. COMPUTER INFORMATION (Business Name Handling)
 # ==============================================================================
 manufacturer=$(sudo dmidecode -s system-manufacturer 2>/dev/null | xargs)
 product_name=$(sudo dmidecode -s system-product-name 2>/dev/null | xargs)
@@ -32,7 +32,7 @@ else
 fi
 
 # ==============================================================================
-# 3. INFORMAÇÕES DA CPU E TEMPERATURA
+# 3. CPU AND TEMPERATURE INFORMATION
 # ==============================================================================
 cpu_model=$(lscpu | grep "Model name" | cut -d ':' -f 2 | xargs)
 cpu_arch=$(lscpu | grep "Architecture" | cut -d ':' -f 2 | xargs)
@@ -47,7 +47,7 @@ cpu_temp=$(sensors 2>/dev/null | grep -i "Package id 0" | awk '{print $4}' | tr 
 [[ ! "$cpu_temp" =~ ^[0-9]+$ ]] && cpu_temp="null"
 
 # ==============================================================================
-# 4. INFORMAÇÕES DA MEMÓRIA RAM
+# 4. RAM MEMORY INFORMATION
 # ==============================================================================
 ram_gb=$(free -g | awk '/Mem:/ {print $2}')
 ram_type=$(sudo dmidecode --type memory 2>/dev/null | grep -i "Type:" | grep -vE "Unknown|None" | head -n 1 | awk '{print $2}')
@@ -57,12 +57,12 @@ ram_speed=$(sudo dmidecode --type memory 2>/dev/null | grep -i "Configured Memor
 [[ ! "$ram_speed" =~ ^[0-9]+$ ]] && ram_speed="null"
 
 # ==============================================================================
-# 5. INFORMAÇÕES DA GPU
+# 5. GPU INFORMATION
 # ==============================================================================
 gpu_model=$(lspci | grep -Ei "vga|3d|display" | cut -d ':' -f 3 | xargs)
 
 # ==============================================================================
-# 6. INFORMAÇÕES DO ARMAZENAMENTO (SMART)
+# 6. STORAGE INFORMATION (SMART)
 # ==============================================================================
 # Ignora o pendrive do Ubuntu Live e seleciona o primeiro disco interno disponível.
 target_disk=$(lsblk -d -n -o NAME,TYPE,TRAN | awk '$2 == "disk" && $3 != "usb" { print $1; exit }')
@@ -97,7 +97,7 @@ else
 fi
 
 # ==============================================================================
-# 7. INFORMAÇÕES DA BATERIA
+# 7. BATTERY INFORMATION
 # ==============================================================================
 bat_path=""
 for candidate in /sys/class/power_supply/BAT*; do
@@ -142,7 +142,7 @@ else
 fi
 
 # ==============================================================================
-# 8. GERAÇÃO DO JSON COM JQ
+# 8. GENERATING JSON WITH JQ
 # ==============================================================================
 jq -n \
   --arg manufacturer "$manufacturer" \
@@ -209,3 +209,71 @@ jq -n \
 
 echo "Processo finalizado! O arquivo result.json foi gerado com sucesso:"
 cat result.json
+
+while true; do
+    read -p "Are you sure you want to continue with the registration?[y/n]: " RESPONSE
+    case "$RESPONSE" in 
+        [yY])
+            echo "Continuing"
+            break
+            ;;
+        [nN])
+            echo "Operation canceled by the user"
+            while true; do
+                read -p "Do you want to delete the result.json file? [y/n]: " OPTION
+                case "$OPTION" in
+                    [yY])
+                        rm -f result.json
+                        break
+                        ;;
+                    [nN])
+                        echo "leaving..."
+                        exit 0
+                        ;;
+                    *)
+                        echo "Invalid option! Please enter only 'y' or 'n'."
+                        echo "--------------------------------------------------------"
+                        ;;
+                esac
+            done
+            exit 0
+            ;;
+        *)
+            echo "Invalid option! Please enter only 'y' or 'n'."
+            echo "--------------------------------------------------------"
+            ;;
+    esac
+done
+
+URL=""
+echo "Sending result.json to $URL..."
+
+RESPONSE_FILE=$(mktemp)
+
+STATUS_CODE=$(curl -s -X POST "$URL" \
+    -H "Content-Type: application/json" \
+    -d @result.json \
+    -o "$RESPONSE_FILE" \
+    -w "%{http_code}"
+)
+
+echo "--------------------------------------------------------"
+
+if [ "$STATUS_CODE" -eq 200 ] || [ "$STATUS_CODE" -eq 201 ]; then
+    echo "Success! HTTP Status: $STATUS_CODE"
+else
+    echo "ERROR! HTTP Status: $STATUS_CODE"
+fi
+
+echo "--------------------------------------------------------"
+
+echo "API response:"
+if command -v jq &> /dev/null; then
+    cat "$RESPONSE_FILE" | jq .
+else
+    cat "$RESPONSE_FILE"
+    echo -e "\nTip: Install 'jq' (apt install jq / brew install jq) to get formatted JSON"
+fi
+
+rm -f "$RESPONSE_FILE"
+rm -f result.json
